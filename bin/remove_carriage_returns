@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require File.expand_path(File.dirname(__FILE__) + "/../lib/file_helpers")
+FileHelpers.remove_carriage_returns
