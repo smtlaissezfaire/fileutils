@@ -1,5 +1,6 @@
 require "facets/file/rewrite"
 require "stringio"
+require 'fileutils'
 
 class FileHelpers
   class << self
@@ -13,6 +14,27 @@ class FileHelpers
 
     def clean_whitespace(start_dir = Dir.getwd)
       new(start_dir).clean_whitespace
+    end
+
+    def rename_files(old_name, new_name, dry_run = false)
+      files = Dir.glob("**/**")
+
+      files.each do |file|
+        file = File.expand_path(file)
+
+        old_name_regex = Regexp.new(old_name)
+
+        if file =~ old_name_regex
+          new_filename = file.gsub(old_name_regex) { new_name }
+          puts "* Replacing old file:\n  #{file} =>\n  #{new_filename}"
+
+          unless dry_run
+            FileUtils.mv(file, new_filename)
+          end
+
+          return rename_files(old_name, new_name, dry_run)
+        end
+      end
     end
   end
 
