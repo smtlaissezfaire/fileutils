@@ -1,19 +1,20 @@
 require "facets/file/rewrite"
 require "stringio"
 require 'fileutils'
+require 'ptools'
 
 class FileHelpers
   class << self
-    def remove_carriage_returns(start_dir = Dir.getwd)
-      new(start_dir).remove_carriage_returns
+    def remove_carriage_returns
+      new.remove_carriage_returns
     end
 
-    def remove_hard_tabs(start_dir = Dir.getwd)
-      new(start_dir).remove_hard_tabs
+    def remove_hard_tabs
+      new.remove_hard_tabs
     end
 
-    def clean_whitespace(start_dir = Dir.getwd)
-      new(start_dir).clean_whitespace
+    def clean_whitespace
+      new.clean_whitespace
     end
 
     def rename_files(old_name, new_name, dry_run = false)
@@ -38,7 +39,7 @@ class FileHelpers
     end
   end
 
-  def initialize(start_dir = Dir.getwd)
+  def initialize(start_dir = default_dir)
     @start_dir = start_dir
   end
 
@@ -77,19 +78,28 @@ class FileHelpers
 
 private
 
+  def default_dir
+    ARGV[0] || Dir.getwd
+  end
+
   def remove_all(search, replace)
     files = Dir.glob("#{@start_dir}/**/*")
 
     files.each do |file|
-      if File.file?(file)
+      next if !File.file?(file)
+      next if File.binary?(file) # TODO: this could be better
 
-        yield(file)
+      yield(file)
 
+      begin
         File.rewrite(file) do |contents|
           str = contents.dup
           str.gsub!(search, replace)
           str
         end
+      rescue => e
+        puts "ERROR rewriting file: #{file}"
+        puts "\tError: #{e}"
       end
     end
   end
