@@ -1,4 +1,11 @@
 #!/usr/bin/env ruby
 
 require File.expand_path(File.dirname(__FILE__) + "/../lib/file_helpers")
-FileHelpers.remove_hard_tabs
+
+PATH = ARGV[0]
+if !PATH
+  raise "must provide a path"
+end
+NUMBER_OF_SPACES = ARGV[1] ? Integer(ARGV[1]) : 2
+
+FileHelpers.tabs_to_spaces(PATH, NUMBER_OF_SPACES)

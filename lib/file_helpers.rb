@@ -9,8 +9,8 @@ class FileHelpers
       new.remove_carriage_returns
     end
 
-    def remove_hard_tabs
-      new.remove_hard_tabs
+    def tabs_to_spaces(path, number)
+      new(path).tabs_to_spaces(number)
     end
 
     def clean_whitespace
@@ -49,8 +49,8 @@ class FileHelpers
     end
   end
 
-  def remove_hard_tabs
-    remove_all(/\t/, "  ") do |file|
+  def tabs_to_spaces(spaces = 2)
+    remove_all(/\t/, (" " * spaces)) do |file|
       puts "Removing hard tabs from #{file}"
     end
   end
@@ -83,7 +83,11 @@ private
   end
 
   def remove_all(search, replace)
-    files = Dir.glob("#{@start_dir}/**/*")
+    files = if File.directory?(@start_dir)
+      Dir.glob("#{@start_dir}/**/*")
+    else
+      [@start_dir]
+    end
 
     files.each do |file|
       next if !File.file?(file)
